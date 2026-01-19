@@ -3,7 +3,7 @@ import { generateState, generateCodeVerifier } from "arctic";
 import { google } from "../OAuth";
 import { prisma } from "../db";
 import type { Request, Response } from "express";
-import { verify, sign } from "jsonwebtoken";
+import { sign } from "jsonwebtoken";
 import type { GoogleUserInfo } from "../types";
 
 const JWT_SECRET = process.env.JWT_SECRET || "secret";
@@ -84,6 +84,10 @@ router.get("/google/callback", async (req, res) => {
     res.status(500).send("OAuth failed");
   }
 });
+
+router.get("/refresh", async (req, res) => {
+    
+})
 
 export default router;
 

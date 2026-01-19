@@ -51,7 +51,7 @@ router.get("/me", authMiddleware, async (req, res) => {
     try {
         const user = await prisma.user.findUnique({
             where: {
-                id: req.body.user_Id
+                id: req.userId
             }
         });
 
@@ -74,5 +74,6 @@ router.get("/me", authMiddleware, async (req, res) => {
         })
     }
 })
+
 
 export default router

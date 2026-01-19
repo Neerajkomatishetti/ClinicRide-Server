@@ -6,26 +6,30 @@ dotenv.config();
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 
-// interface userID_REQUEST extends Request {
-//     user_Id?: string;
-// }
+// Extend Express Request to include userId
+declare global {
+    namespace Express {
+        interface Request {
+            userId?: string;
+        }
+    }
+}
 
-interface payload {
+interface JwtPayload {
     id: string;
 }
 
-const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
-    const token = req.cookies.accessToken || req.headers.authorization?.split(" ")[1];
-    if (!token){
+const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+    const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
+    if (!token) {
         return res.status(401).json({ error: "Unauthorized" });
-     } 
-
-    // jwt.verify will throw if expired or invalid 
+    } 
     try {
-        const payload = jwt.verify(token, JWT_SECRET) as payload;
-        req.body.user_Id = payload.id ; 
+        const payload = jwt.verify(token, JWT_SECRET) as JwtPayload;
+        req.userId = payload.id; 
         next(); 
-    } catch (err:any) {
+
+    } catch (err: any) {
         if (err.name === "TokenExpiredError") { 
             return res.status(401).json({ error: "Token expired" });
         } 

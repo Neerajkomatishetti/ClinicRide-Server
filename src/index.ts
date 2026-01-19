@@ -3,6 +3,7 @@ import cors from 'cors'
 import dotenv from 'dotenv'
 import userRoutes from './routes/user'
 import authRoutes from './routes/auth'
+import bookingRoutes from './routes/booking'
 import cookieParser from 'cookie-parser'
 
 dotenv.config()
@@ -15,6 +16,7 @@ app.use(cookieParser())
 
 app.use('/user', userRoutes)
 app.use('/auth', authRoutes)
+app.use('/booking', bookingRoutes)
 
 app.listen(3000, () => {
     console.log(`Server is running on port 3000`)
