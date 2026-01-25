@@ -7,6 +7,7 @@ import {
   GuardianResponseSchema,
   UpdateBookingStatusSchema,
 } from "../types";
+import { broadcastToBooking, broadcastToUser, broadcastToRole } from "../lib/websocket";
 
 const router = Router();
 
@@ -91,6 +92,12 @@ router.post("/", authMiddleware, async (req, res) => {
 
     // Find eligible guardians
     const eligibleGuardians = await findEligibleGuardians(hospitalId);
+
+    // Notify all approved guardians via WebSocket
+    broadcastToRole("GUARDIAN", {
+      type: "new_booking_request",
+      booking
+    });
 
     return res.status(201).json({
       message: "Booking request created successfully",
@@ -242,7 +249,7 @@ router.post("/respond", authMiddleware, async (req, res) => {
             include: {
               patient: {
                 include: {
-                  user: { select: { fullName: true, mobile: true, email: true } },
+                  user: { select: { id: true, fullName: true, mobile: true, email: true } },
                 },
               },
               hospital: true,
@@ -250,6 +257,13 @@ router.post("/respond", authMiddleware, async (req, res) => {
             },
           });
         });
+
+        // Notify patient via WebSocket
+        broadcastToUser(updatedBooking.patient.user.id, {
+          type: 'booking_accepted',
+          booking: updatedBooking
+        });
+
 
         return res.json({
           message: "Booking accepted! Session will begin soon.",
@@ -391,8 +405,8 @@ router.patch("/:id/status", authMiddleware, async (req, res) => {
       where: { id: bookingId },
       data: { status },
       include: {
-        patient: { include: { user: { select: { fullName: true } } } },
-        guardian: { include: { user: { select: { fullName: true } } } },
+        patient: { include: { user: { select: { id: true, fullName: true } } } },
+        guardian: { include: { user: { select: { id: true, fullName: true } } } },
         hospital: true,
       },
     });
@@ -403,10 +417,33 @@ router.patch("/:id/status", authMiddleware, async (req, res) => {
       CANCELLED: "Booking has been cancelled.",
     };
 
+    // Broadcast update to both parties via booking channel
+    broadcastToBooking(bookingId, {
+      type: 'booking_status_updated',
+      status,
+      booking: updatedBooking
+    });
+
+    // Also broadcast directly to user IDs to update dashboards
+    broadcastToUser((updatedBooking as any).patient.user.id, {
+      type: 'booking_status_updated',
+      status,
+      booking: updatedBooking
+    });
+
+    if ((updatedBooking as any).guardian?.user?.id) {
+      broadcastToUser((updatedBooking as any).guardian.user.id, {
+        type: 'booking_status_updated',
+        status,
+        booking: updatedBooking
+      });
+    }
+
     return res.json({
       message: statusMessages[status],
       booking: updatedBooking,
     });
+
   } catch (error) {
     console.error("Update booking status error:", error);
     return res.status(500).json({ error: "Internal server error" });

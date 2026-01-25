@@ -1,4 +1,6 @@
 import { Router } from "express";
+import dotenv from 'dotenv';
+dotenv.config();
 import { generateState, generateCodeVerifier } from "arctic";
 import { google } from "../lib/oauth"
 import { prisma } from "../lib/db";
@@ -8,7 +10,7 @@ import { SendOtpSchema, VerifyOtpSchema } from "../types";
 import type { GoogleUserInfo } from "../types";
 import { twilio_client } from "../lib/oauth"
 
-const JWT_SECRET = process.env.JWT_SECRET || "secret";
+const JWT_SECRET = process.env.JWT_SECRET!;
 const VERIFY_SERVICE_SID = process.env.VERIFY_SERVICE_SID;
 
 const router = Router()
@@ -87,7 +89,7 @@ router.get("/google/callback", async (req, res) => {
 
     // If user already exists, log them in
     if (existingAuthAccount) {
-      const token = sign({ id: existingAuthAccount.userId }, JWT_SECRET, { expiresIn: "7d" });
+      const token = sign({ id: existingAuthAccount.userId, role: (existingAuthAccount as any).user.role }, JWT_SECRET, { expiresIn: "7d" });
 
       res.cookie("token", token, {
         httpOnly: true,
@@ -130,7 +132,7 @@ router.get("/google/callback", async (req, res) => {
       return user;
     });
 
-    const token = sign({ id: newUser.id }, JWT_SECRET, { expiresIn: "7d" });
+    const token = sign({ id: newUser.id, role: newUser.role }, JWT_SECRET, { expiresIn: "7d" });
 
     res.cookie("token", token, {
       httpOnly: true,
@@ -223,7 +225,7 @@ router.post('/verify-otp', async (req, res) => {
     // If user already exists, log them in
     if (existingAuthAccount) {
       const token = sign(
-        { id: existingAuthAccount.userId }, 
+        { id: existingAuthAccount.userId, role: (existingAuthAccount as any).user.role }, 
         JWT_SECRET, 
         { expiresIn: '7d' }
       );
@@ -273,7 +275,7 @@ router.post('/verify-otp', async (req, res) => {
     });
 
     const token = sign(
-      { id: newUser.id }, 
+      { id: newUser.id, role: newUser.role }, 
       JWT_SECRET, 
       { expiresIn: '7d' }
     );

@@ -52,10 +52,31 @@ model Patient {
   gender          String
   emergencyPhone  String?
   bookings        Booking[]
+  addresses       Address[]  // One-to-many relation
 
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt       DateTime @default(now())
+}
+
+// Patient Saved Addresses
+model Address {
+  id              String   @id @default(uuid())
+  patientId       String
+
+  label           String   // e.g., "Home", "Work", "Parent's House"
+  addressLine     String   // Full address text
+  latitude        Float
+  longitude       Float
+  
+  isDefault       Boolean  @default(false) // Mark one address as default
+
+  patient         Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([patientId])
 }
 
 
@@ -170,9 +191,9 @@ model Booking {
   
   status       BookingStatus @default(REQUESTED)
 
-  patient      Patient   @relation(fields: [patientId], references: [id])
-  guardian     Guardian? @relation(fields: [guardianId], references: [id])
-  hospital     Hospital  @relation(fields: [hospitalId], references: [id])
+  patient      Patient   @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  guardian     Guardian? @relation(fields: [guardianId], references: [id], onDelete: SetNull)
+  hospital     Hospital  @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
 
   services     BookingService[]
   review       Review?
@@ -187,8 +208,8 @@ model BookingService {
   bookingId String
   serviceId String
 
-  booking  Booking @relation(fields: [bookingId], references: [id])
-  service  Service @relation(fields: [serviceId], references: [id])
+  booking  Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  service  Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
 
   @@id([bookingId, serviceId])
 }
@@ -200,8 +221,8 @@ model Review {
   bookingId  String   @unique
   guardianId String
 
-  booking     Booking   @relation(fields: [bookingId], references: [id])
-  guardian   Guardian @relation(fields: [guardianId], references: [id])
+  booking     Booking   @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  guardian   Guardian @relation(fields: [guardianId], references: [id], onDelete: Cascade)
 }
 
 

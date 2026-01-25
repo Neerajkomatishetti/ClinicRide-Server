@@ -54,6 +54,7 @@ export const ModelName = {
   User: 'User',
   AuthAccount: 'AuthAccount',
   Patient: 'Patient',
+  Address: 'Address',
   Guardian: 'Guardian',
   Doctor: 'Doctor',
   Hospital: 'Hospital',
@@ -114,6 +115,21 @@ export const PatientScalarFieldEnum = {
 } as const
 
 export type PatientScalarFieldEnum = (typeof PatientScalarFieldEnum)[keyof typeof PatientScalarFieldEnum]
+
+
+export const AddressScalarFieldEnum = {
+  id: 'id',
+  patientId: 'patientId',
+  label: 'label',
+  addressLine: 'addressLine',
+  latitude: 'latitude',
+  longitude: 'longitude',
+  isDefault: 'isDefault',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AddressScalarFieldEnum = (typeof AddressScalarFieldEnum)[keyof typeof AddressScalarFieldEnum]
 
 
 export const GuardianScalarFieldEnum = {

@@ -85,6 +85,7 @@ router.get("/me", authMiddleware, async (req, res) => {
       },
       profile: roleProfile,
       profileComplete,
+      token: req.token,
     });
   } catch (error) {
     console.error(error);

@@ -670,18 +670,6 @@ export type HospitalUpdateOneRequiredWithoutDoctorsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.HospitalUpdateToOneWithWhereWithoutDoctorsInput, Prisma.HospitalUpdateWithoutDoctorsInput>, Prisma.HospitalUncheckedUpdateWithoutDoctorsInput>
 }
 
-export type FloatFieldUpdateOperationsInput = {
-  set?: number
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
-export type BoolFieldUpdateOperationsInput = {
-  set?: boolean
-}
-
 export type HospitalCreateNestedOneWithoutServicesInput = {
   create?: Prisma.XOR<Prisma.HospitalCreateWithoutServicesInput, Prisma.HospitalUncheckedCreateWithoutServicesInput>
   connectOrCreate?: Prisma.HospitalCreateOrConnectWithoutServicesInput

@@ -1,14 +1,18 @@
-import express from 'express'
-import cors from 'cors'
 import dotenv from 'dotenv'
+dotenv.config()
+
+import express from 'express'
+import { createServer } from 'http'
+import cors from 'cors'
 import profileRoutes from './routes/Profile'
 import authRoutes from './routes/auth'
 import bookingRoutes from './routes/booking'
+import addressRoutes from './routes/address'
 import cookieParser from 'cookie-parser'
-
-dotenv.config()
+import { setupWebSocketServer } from './lib/websocket'
 
 const app = express()
+const httpServer = createServer(app)
 
 // Configure CORS to allow credentials from frontend
 app.use(cors({
@@ -23,10 +27,15 @@ app.use(cookieParser())
 app.use('/profile', profileRoutes)
 app.use('/auth', authRoutes)
 app.use('/booking', bookingRoutes)
+app.use('/address', addressRoutes)
+
+// Initialize WebSocket server
+setupWebSocketServer(httpServer)
 
 if (process.env.NODE_ENV !== 'test') {
-    app.listen(3000, () => {
+    httpServer.listen(3000, () => {
         console.log(`Server is running on port 3000`)
+        console.log(`WebSocket server running on ws://localhost:3000/ws`)
     })
 }
 
